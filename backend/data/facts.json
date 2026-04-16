@@ -1,0 +1,27 @@
+{
+  "full_name": "Ukweh Chima Everest",
+  "name": "relativity-codes",
+  "current_role": "Senior Full-Stack Software Engineer",
+  "location": "Abuja, Federal Capital Territory (FCT), Nigeria",
+  "email": "ukweheverest@gmail.com",
+  "linkedin": "https://linkedin.com/in/ukweheverest",
+  "specialties": [
+    "Backend Architecture & API Design",
+    "AI/LLM Systems (RAG, Fine-tuning, LangChain)",
+    "Distributed Systems & Scalable Platforms",
+    "Cloud Infrastructure (AWS, GCP)",
+    "Full-Stack Development (Next.js, React, TypeScript)",
+    "Microservices & Event-Driven Systems",
+    "Database Design & Optimization (SQL, Multi-tenancy)",
+    "Authentication & Security Systems",
+    "Machine Learning & Deep Learning (PyTorch, Transformers)"
+  ],
+  "years_experience": 9,
+  "education": [
+    {
+      "degree": "Bachelor of Technology (B.Tech) in Environmental Engineering Technology",
+      "institution": "Federal University of Technology Owerri",
+      "year": "2016"
+    }
+  ]
+}
