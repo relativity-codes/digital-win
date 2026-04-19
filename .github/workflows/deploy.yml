@@ -62,4 +62,4 @@ jobs:
           source venv/bin/activate
           pip install zappa mangum
           pip install -r requirements.txt
-          zappa update dev || zappa deploy dev || (zappa tail dev --limit 50 && exit 1)
+          zappa update dev || zappa deploy dev || (zappa tail dev --since 10m --disable-keep-open && exit 1)
