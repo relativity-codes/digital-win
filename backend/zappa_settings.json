@@ -2,7 +2,6 @@
     "dev": {
         "app_function": "server.handler",
         "aws_region": "us-east-1",
-        "profile_name": "default",
         "project_name": "digital-win",
         "runtime": "python3.10",
         "s3_bucket": "zappa-deploy-bucket-digital-win",
