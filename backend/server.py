@@ -1,4 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, RedirectResponse
+from mangum import Mangum
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai import OpenAI
@@ -17,6 +20,7 @@ load_dotenv()
 
 # Init app
 app = FastAPI()
+handler = Mangum(app)
 
 # OpenAI client (OpenRouter)
 client = OpenAI(
@@ -171,6 +175,31 @@ async def health():
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat()
     }
+
+
+# -------------------------
+# Static Frontend Serving
+# -------------------------
+
+# Mount the static directory
+# Note: In CI, we copy frontend/out to backend/static
+try:
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+except Exception:
+    print("Static directory not found. Skipping static file mounting.")
+
+
+@app.get("/{full_path:path}")
+async def serve_frontend(full_path: str):
+    # API routes should be matched first.
+    # If not an API route, serve the index.html from static folder.
+    try:
+        if os.path.exists("static/index.html"):
+            return FileResponse("static/index.html")
+    except Exception:
+        pass
+    
+    return {"message": "Digital Twin API is running. Frontend static files not found."}
 
 
 # -------------------------

@@ -1,0 +1,33 @@
+{
+    "dev": {
+        "app_function": "server.handler",
+        "aws_region": "us-east-1",
+        "profile_name": "default",
+        "project_name": "digital-win",
+        "runtime": "python3.10",
+        "s3_bucket": "zappa-deploy-bucket-digital-win",
+        "environment_variables": {
+            "OPENAI_API_KEY": "REPLACE_ME_IN_CI",
+            "OPENAI_BASE_URL": "REPLACE_ME_IN_CI",
+            "CORS_ORIGINS": "*",
+            "BEDROCK_MODEL_ID": "global.amazon.nova-2-lite-v1:0",
+            "USE_S3": "false",
+            "REDIS_HOST": "REPLACE_ME_IN_CI",
+            "REDIS_PORT": "REPLACE_ME_IN_CI",
+            "REDIS_USER": "REPLACE_ME_IN_CI",
+            "REDIS_PASSWORD": "REPLACE_ME_IN_CI",
+            "REDIS_DB": "REPLACE_ME_IN_CI"
+        },
+        "exclude": [
+            "*.zip",
+            "*.rar",
+            "*.pdf",
+            "*.env",
+            "*.example",
+            "__pycache__/",
+            ".sixth/",
+            "venv/",
+            ".git/"
+        ]
+    }
+}

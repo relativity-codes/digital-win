@@ -1,23 +1,43 @@
-name: Deploy with Terraform
+name: Unified Zappa Deployment
 
 on:
   push:
     branches: [main]
 
 jobs:
-  terraform:
+  deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: terraform
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
+      # --- 1. BUILD FRONTEND ---
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          terraform_version: 1.3.0
+          node-version: '18'
+
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+      
+      - name: Prepare Static Directory
+        run: |
+          mkdir -p backend/static
+          cp -r frontend/out/* backend/static/
+
+      # --- 2. SET UP BACKEND & ZAPPA ---
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Python Dependencies
+        run: |
+          pip install zappa mangum
+          pip install -r backend/requirements.txt
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -26,48 +46,21 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Plan
-        run: terraform plan
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
-
-  upload-frontend:
-    needs: terraform
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build static site
-        run: npm run build && npm run export
-
-      - name: Upload to S3
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
+      - name: Inject ALL Secrets into Zappa Settings
         run: |
-          aws s3 sync out/ s3://digital-win-frontend-bucket --delete
+          sudo apt-get install jq -y
+          # Map TF_VAR_* secrets to Zappa environment variables
+          SETTINGS="backend/zappa_settings.json"
+          
+          jq '.dev.environment_variables.OPENAI_API_KEY = "${{ secrets.TF_VAR_OPENAI_API_KEY }}"' $SETTINGS > tmp.json && mv tmp.json $SETTINGS
+          jq '.dev.environment_variables.OPENAI_BASE_URL = "${{ secrets.TF_VAR_OPENAI_BASE_URL }}"' $SETTINGS > tmp.json && mv tmp.json $SETTINGS
+          jq '.dev.environment_variables.REDIS_HOST = "${{ secrets.TF_VAR_REDIS_HOST }}"' $SETTINGS > tmp.json && mv tmp.json $SETTINGS
+          jq '.dev.environment_variables.REDIS_PORT = "${{ secrets.TF_VAR_REDIS_PORT }}"' $SETTINGS > tmp.json && mv tmp.json $SETTINGS
+          jq '.dev.environment_variables.REDIS_DB = "${{ secrets.TF_VAR_REDIS_DB }}"' $SETTINGS > tmp.json && mv tmp.json $SETTINGS
+          jq '.dev.environment_variables.REDIS_USER = "${{ secrets.TF_VAR_REDIS_USER }}"' $SETTINGS > tmp.json && mv tmp.json $SETTINGS
+          jq '.dev.environment_variables.REDIS_PASSWORD = "${{ secrets.TF_VAR_REDIS_PASSWORD }}"' $SETTINGS > tmp.json && mv tmp.json $SETTINGS
 
-      - name: Invalidate CloudFront
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
+      - name: Zappa Deploy or Update
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DIST_ID }} --paths "/*"
+          cd backend
+          zappa update dev || zappa deploy dev
