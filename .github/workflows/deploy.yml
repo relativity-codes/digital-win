@@ -34,11 +34,6 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Python Dependencies
-        run: |
-          pip install zappa mangum
-          pip install -r backend/requirements.txt
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -60,7 +55,11 @@ jobs:
           jq '.dev.environment_variables.REDIS_USER = "${{ secrets.TF_VAR_REDIS_USER }}"' $SETTINGS > tmp.json && mv tmp.json $SETTINGS
           jq '.dev.environment_variables.REDIS_PASSWORD = "${{ secrets.TF_VAR_REDIS_PASSWORD }}"' $SETTINGS > tmp.json && mv tmp.json $SETTINGS
 
-      - name: Zappa Deploy or Update
+      - name: Install dependencies & Zappa Deploy
         run: |
           cd backend
+          python -m venv venv
+          source venv/bin/activate
+          pip install zappa mangum
+          pip install -r requirements.txt
           zappa update dev || zappa deploy dev
