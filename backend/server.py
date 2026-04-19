@@ -20,7 +20,15 @@ load_dotenv()
 
 # Init app
 app = FastAPI()
-handler = Mangum(app)
+
+def handler(event, context):
+    # Ignore Zappa's "keep-warm" scheduled events
+    if event.get("detail-type") == "Scheduled Event":
+        return
+    
+    # Handle standard HTTP requests
+    asgi_handler = Mangum(app, lifespan="off")
+    return asgi_handler(event, context)
 
 # OpenAI client (OpenRouter)
 client = OpenAI(
