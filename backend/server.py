@@ -37,9 +37,8 @@ def safe_int(value, default):
 # Redis client
 redis = Redis(
     host=os.getenv("REDIS_HOST", "localhost"),
-    port=safe_int(os.getenv("REDIS_PORT"), 6379),
-    db=safe_int(os.getenv("REDIS_DB"), 0),
-    username=os.getenv("REDIS_USER", ""),
+    port=safe_int(os.getenv("REDIS_PORT"), 17339),
+    username=os.getenv("REDIS_USER", "default"),
     password=os.getenv("REDIS_PASSWORD", ""),
     decode_responses=True
 )
