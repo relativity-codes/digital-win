@@ -41,7 +41,7 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/chat", {
+      const response = await fetch("chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

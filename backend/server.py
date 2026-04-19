@@ -190,14 +190,15 @@ async def health():
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):
     # Construct the path to the file in the static directory
-    static_file_path = os.path.join("static", full_path)
+    # Note: Zappa/Lambda environment requires absolute path safety
+    static_file_path = os.path.join(os.getcwd(), "static", full_path)
     
     # 1. If it's a file that exists, serve it (e.g., /_next/static/...)
     if os.path.isfile(static_file_path):
         return FileResponse(static_file_path)
     
     # 2. Otherwise, serve index.html for root or SPA routing
-    index_path = os.path.join("static", "index.html")
+    index_path = os.path.join(os.getcwd(), "static", "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
     
