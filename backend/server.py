@@ -28,11 +28,17 @@ client = OpenAI(
     base_url=os.getenv("OPENAI_BASE_URL"),
 )
 
+def safe_int(value, default):
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
 # Redis client
 redis = Redis(
     host=os.getenv("REDIS_HOST", "localhost"),
-    port=int(os.getenv("REDIS_PORT", 6379)),
-    db=int(os.getenv("REDIS_DB", 0)),
+    port=safe_int(os.getenv("REDIS_PORT"), 6379),
+    db=safe_int(os.getenv("REDIS_DB"), 0),
     username=os.getenv("REDIS_USER", ""),
     password=os.getenv("REDIS_PASSWORD", ""),
     decode_responses=True
