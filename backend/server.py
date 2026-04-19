@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
-from mangum import Mangum
+from a2wsgi import ASGIMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai import OpenAI
@@ -20,15 +20,7 @@ load_dotenv()
 
 # Init app
 app = FastAPI()
-
-def handler(event, context):
-    # Ignore Zappa's "keep-warm" scheduled events
-    if event.get("detail-type") == "Scheduled Event":
-        return
-    
-    # Handle standard HTTP requests
-    asgi_handler = Mangum(app, lifespan="off")
-    return asgi_handler(event, context)
+handler = ASGIMiddleware(app)
 
 # OpenAI client (OpenRouter)
 client = OpenAI(

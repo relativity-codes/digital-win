@@ -4,6 +4,6 @@ python-dotenv
 python-multipart
 boto3
 pypdf
-mangum
+a2wsgi
 redis
 openai
