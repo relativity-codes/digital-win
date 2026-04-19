@@ -33,3 +33,5 @@ memory/*.json
 
 # Vercel
 .vercel
+
+static

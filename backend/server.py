@@ -181,23 +181,19 @@ async def health():
 # Static Frontend Serving
 # -------------------------
 
-# Mount the static directory
-# Note: In CI, we copy frontend/out to backend/static
-try:
-    app.mount("/static", StaticFiles(directory="static"), name="static")
-except Exception:
-    print("Static directory not found. Skipping static file mounting.")
-
-
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):
-    # API routes should be matched first.
-    # If not an API route, serve the index.html from static folder.
-    try:
-        if os.path.exists("static/index.html"):
-            return FileResponse("static/index.html")
-    except Exception:
-        pass
+    # Construct the path to the file in the static directory
+    static_file_path = os.path.join("static", full_path)
+    
+    # 1. If it's a file that exists, serve it (e.g., /_next/static/...)
+    if os.path.isfile(static_file_path):
+        return FileResponse(static_file_path)
+    
+    # 2. Otherwise, serve index.html for root or SPA routing
+    index_path = os.path.join("static", "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
     
     return {"message": "Digital Twin API is running. Frontend static files not found."}
 
