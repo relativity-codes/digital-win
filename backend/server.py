@@ -43,6 +43,7 @@ redis = Redis(
     decode_responses=True
 )
 
+
 # CORS
 origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
 
