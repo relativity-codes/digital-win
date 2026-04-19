@@ -23,8 +23,13 @@ jobs:
           npm install
           npm run build
       
-      - name: Prepare Static Directory
+      - name: Make Paths Relative & Prepare Static Directory
         run: |
+          # Convert absolute paths (/_next, /favicon.ico) to relative (./_next, ./favicon.ico)
+          # using sed on all HTML files in the static export.
+          find frontend/out -name "*.html" -exec sed -i 's|href="/|href="./|g' {} +
+          find frontend/out -name "*.html" -exec sed -i 's|src="/|src="./|g' {} +
+          
           mkdir -p backend/static
           cp -r frontend/out/* backend/static/
 
